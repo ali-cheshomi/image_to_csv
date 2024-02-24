@@ -18,3 +18,14 @@ With these variables, you can change the csv file name and csv path
 csv_path='.\\'
 csv_name='test.csv'
 ```
+
+
+warning !!!
+If you get an error, you need to install the PLI library
+```cmd
+pythin.exe -m pip install PIL
+```
+or
+```cmd
+pip install PIL
+```
