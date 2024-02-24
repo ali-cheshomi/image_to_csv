@@ -3,7 +3,7 @@ import csv
 try:
     from PIL import Image
 except:
-    print("you should install PIL library , 'pip install PIL'")
+    print("you need to install PIL library , 'pip install PIL'")
     exit()
 
 def csv_field(wh,additionalField,pixelFieldName='px'):   
@@ -62,13 +62,13 @@ def path_to_list(path,format='.jpg'):
     return lst
 
 def pics_to_csv(lst,path,additionalField):
-    global imageWidth,imageHight
+    global imageWidth,imageHeight
     for i in lst:
         imgpath =f'{path}{i}'
         img =Image.open(imgpath)
-        '''--- width=imageWidth ,hight=imageHight ---'''
-        if img.size!=(imageWidth,imageHight):
-            img=img.resize((imageWidth,imageHight))
+        '''--- width=imageWidth ,hight=imageHeight ---'''
+        if img.size!=(imageWidth,imageHeight):
+            img=img.resize((imageWidth,imageHeight))
         lstnp=img_to_pixel(img)
         add_to_csv(lstnp,additionalField)
 
@@ -81,22 +81,15 @@ def create_csv(path,group,imagesFormat='.jpg'):
 
 # global value
 imageWidth=48
-imageHight=48
+imageHeight=48
 
 csv_path='.\\'
 csv_name='test.csv'
 
 # example 
-'''You can repeat this step to add another image path'''
+'''You can repeat this part to add another image path'''
 testPath1='Test_Pictures\\'
 # testPath2='Test_Pictures_1\\'
 
 create_csv(path=testPath1,group=0)
 # create_csv(path=testPath2,group=1)
-
-
-
-
-
-
-
