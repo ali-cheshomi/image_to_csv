@@ -1,95 +1,122 @@
-import os
-import csv
+try:
+    import subprocess
+    p = subprocess.run('pip --version',capture_output=True)
+except:
+    print("you need to install subprocess library , 'pip install subprocess'")
+    exit()
+try:
+    from pathlib import Path
+except:
+    
+    print("you need to install pathlib library , 'pip install pathlib'")
+    installOK = input("Do you want to install pathlib (y/n): ")
+    if(installOK != "n"):
+        subprocess.run('pip install pathlib')
+    exit()
+try:
+    import csv
+except:
+    installOK = input("Do you want to install csv (y/n): ")
+    if(installOK != "n"):
+        subprocess.run('pip install csv')
+    print("you need to install csv library , 'pip install csv'")
+    exit()
 try:
     from PIL import Image
 except:
+    installOK = input("Do you want to install PIL (y/n): ")
+    if(installOK != "n"):
+        subprocess.run('pip install PIL')
     print("you need to install PIL library , 'pip install PIL'")
     exit()
 
-def csv_field(wh,additionalField,pixelFieldName='px'):   
-    field = []
-    for i in range(wh):
-        field.append(f'{pixelFieldName}{i}')
-    afk=list(additionalField.keys())
-    for a in afk:
-        field.append(a) 
+'''-------------------------Image To CSV Class----------------------------'''
 
-    return field
+class ImageToCSV:
+    image:Image
+    imagePath:str
+    imageWidth:int
+    imageHeight:int
+    imagePixels:list = []
+    csvPath:str
+    csvName:str
+    csvPixelFieldName:str = 'PX'
+    csvField:list = []
+    csvAdditionalField:dict = {}
+    isGrayScale:bool = False
+    
+    def __init__(self,imagePath,imageWidth:int,imageHeight:int,csvPath:str=".\\",csvName:str="imagePixels.csv",csvAdditionalField:dict={},isGrayScale:bool=False):
+        self.imagePath = imagePath
+        self.imageWidth = imageWidth
+        self.imageHeight = imageHeight
+        self.csvPath = Path(csvPath).joinpath(csvName)
+        self.csvName = csvName
+        self.image = Image.open(imagePath)
+        self.isGrayScale = isGrayScale
 
-def is_File_Exist(path,filename):
-    lst= os.listdir(path)
-    for f in lst:
-        if(filename ==f):
-            return True
-    return False
+        self.__imgToPixel__()
+        self.csvAdditionalField = csvAdditionalField
+        
+    def addToCSV(self) -> None:  
+        if self.image.size != (self.imageWidth,self.imageHeight):
+            self.image = self.image.resize((self.imageWidth,self.imageHeight))
+  
+        self.__imgToPixel__()
+        rows=list(self.imagePixels)
+        afv=list(self.csvAdditionalField.values())
+        for a in afv:
+            rows.append(a)
+        field = self.__csvField__()        
+        if(not self.__isCsvFileExist__()):
+            with open(self.csvPath, 'w+', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(field)
+                writer.writerow(rows)      
+        else:        
+            with open(self.csvPath, 'a+', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(rows)
+    
+    def __csvField__(self) -> list:   
+        field = []
+        wh=len(self.imagePixels)
+        for i in range(wh):
+            field.append(f'{self.csvPixelFieldName}{i}')
+        afk=list(self.csvAdditionalField.keys())
+        for a in afk:
+            field.append(a) 
+        return field
 
-def add_to_csv(pixels,additionalField):  
-    global csv_path,csv_name
-    wh=len(pixels)
-    rows=pixels
-    afv=list(additionalField.values())
-    for a in afv:
-        rows.append(a)
+    def __isCsvFileExist__(self) -> bool:
+        return Path(self.csvPath).exists()
 
-    field = csv_field(wh,additionalField)
-    if(is_File_Exist(csv_path,csv_name)==False):
+    def __imgToPixel__(self) -> None:
+        if(self.isGrayScale):
+            # convert image to grayscale image
+            self.image=self.image.convert('L')
+        w,h=self.image.size
+        
+        px=[]
+        for i in range(w):
+            for j in range(h):
+                px.append(self.image.getpixel((i,j)))
+        self.imagePixels = px
 
-        with open(csv_name, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(field)
-    else:        
-        with open(csv_name, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(rows)
+'''---------------------------------Main----------------------------------'''
 
-def img_to_pixel(img,mode='G'):
-    if(mode=='G'):
-        # convert image to grayscale image
-        img=img.convert('L')
-    w,h=img.size
-    px=[]
-    for i in range(w):
-        for j in range(h):
-            px.append(img.getpixel((i,j)))
-    return px
+if __name__ == "__main__":
+    print('''
+    example:
 
-def path_to_list(path,format='.jpg'):
-    lstdir= os.listdir(path)
-    lst=[]
-    for l in lstdir:
-        if l.find(format)!=-1:
-            lst.append(l)
-    return lst
-
-def pics_to_csv(lst,path,additionalField):
-    global imageWidth,imageHeight
-    for i in lst:
-        imgpath =f'{path}{i}'
-        img =Image.open(imgpath)
-        '''--- width=imageWidth ,hight=imageHeight ---'''
-        if img.size!=(imageWidth,imageHeight):
-            img=img.resize((imageWidth,imageHeight))
-        lstnp=img_to_pixel(img)
-        add_to_csv(lstnp,additionalField)
-
-def create_csv(path,group,imagesFormat='.jpg'):
-    lst=path_to_list(path=path,format=imagesFormat)
-    '''whit "additionalField" you can add some field to csv '''
-    additionalField={'group':group }
-    pics_to_csv(lst=lst,path=path,additionalField=additionalField)
-'''-------------------------main----------------------------'''
-
-# global value
-imageWidth=48
-imageHeight=48
-
-csv_path='.\\'
-csv_name='test.csv'
-
-# example 
-'''You can repeat this part to add another image path'''
-testPath1='Test_Pictures\\'
-# testPath2='Test_Pictures_1\\'
-
-create_csv(path=testPath1,group=0)
-# create_csv(path=testPath2,group=1)
+        # with "img.csvAdditionalField" you can add some field to csv 
+        
+        imgAddr = "Test_Pictures/3.jpg"
+        
+        img1 = ImageToCSV(imgAddr,2,2,csvAdditionalField={'test1':1,'test2':'test2'},isGrayScale=False)
+        img1.addToCSV()
+        
+        img2 = ImageToCSV(imgAddr,2,2,csvAdditionalField={'test1':0,'test2':'test2'},isGrayScale=True)
+        img2.csvAdditionalField = {'test3':0}
+        img2.addToCSV()
+    
+    ''')
