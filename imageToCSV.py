@@ -12,36 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-try:
-    import subprocess
-    p = subprocess.run('pip --version',capture_output=True)
-except:
-    print("you need to install subprocess library , 'pip install subprocess'")
-    exit()
-try:
-    from pathlib import Path
-except:
-    
-    print("you need to install pathlib library , 'pip install pathlib'")
-    installOK = input("Do you want to install pathlib (y/n): ")
-    if(installOK != "n"):
-        subprocess.run('pip install pathlib')
-    exit()
-try:
-    import csv
-except:
-    installOK = input("Do you want to install csv (y/n): ")
-    if(installOK != "n"):
-        subprocess.run('pip install csv')
-    print("you need to install csv library , 'pip install csv'")
-    exit()
+import subprocess
+import csv
+from pathlib import Path
 try:
     from PIL import Image
 except:
     installOK = input("Do you want to install PIL (y/n): ")
     if(installOK != "n"):
-        subprocess.run('pip install PIL')
+        subprocess.run('pip install pillow')
     print("you need to install PIL library , 'pip install PIL'")
     exit()
 
@@ -60,7 +39,7 @@ class ImageToCSV:
     csvAdditionalField:dict = {}
     isGrayScale:bool = False
     
-    def __init__(self,imagePath,imageWidth:int,imageHeight:int,csvPath:str=".\\",csvName:str="imagePixels.csv",csvAdditionalField:dict={},isGrayScale:bool=False,csvPixelFieldName:str="PX"):
+    def __init__(self,imagePath,imageWidth:int,imageHeight:int,csvPath:str=".",csvName:str="imagePixels.csv",csvAdditionalField:dict={},isGrayScale:bool=False,csvPixelFieldName:str="PX"):
         self.imagePath = imagePath
         self.imageWidth = imageWidth
         self.imageHeight = imageHeight
@@ -125,12 +104,12 @@ if __name__ == "__main__":
 
         # with "img.csvAdditionalField" you can add some field to csv 
         
-        imgAddr = "Test_Pictures/1.jpg"
+        imgAddr = "Test_Pictures/3.jpg"
         
-        img1 = ImageToCSV(imgAddr,40,40,csvAdditionalField={'test1':1,'test2':'test2'},isGrayScale=False)
+        img1 = ImageToCSV(imgAddr,2,2,csvAdditionalField={'test1':1,'test2':'test2'},isGrayScale=False)
         img1.addToCSV()
         
-        img2 = ImageToCSV(imgAddr,48,48,csvAdditionalField={'test1':0,'test2':'test2'},isGrayScale=True)
+        img2 = ImageToCSV(imgAddr,2,2,csvAdditionalField={'test1':0,'test2':'test2'},isGrayScale=True)
         img2.csvAdditionalField = {'test3':0}
         img2.addToCSV()
     
